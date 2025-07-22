@@ -74,6 +74,13 @@ def main():
     if pcd_selecionado != 'Todos':
         df_filtrado = df_filtrado[df_filtrado['PCD'] == pcd_selecionado]
     
+    # Créditos do desenvolvedor
+    st.sidebar.markdown("---")
+    st.sidebar.markdown(
+        "<small style='color: #888888;'>Dashboard desenvolvido por Mauricio Lobo</small>", 
+        unsafe_allow_html=True
+    )
+    
     # Aplicar ordenação
     df_filtrado = sort_data(df_filtrado)
     
@@ -104,26 +111,45 @@ def main():
         df_display = df_filtrado.copy()
         df_display['DATA NASC'] = df_display['DATA NASC'].dt.strftime('%d/%m/%Y')
         
-        # Adicionar coluna de posição
+        # Adicionar coluna de posição/classificação
         df_display.insert(0, 'POSIÇÃO', range(1, len(df_display) + 1))
         
-        # Configurar a tabela
+        
+        # Configurar a tabela com fonte menor e colunas mais estreitas
+        st.markdown("""
+        <style>
+        .stDataFrame {
+            font-size: 8px;
+        }
+        .stDataFrame table {
+            font-size: 8px;
+        }
+        .stDataFrame th {
+            font-size: 8px;
+        }
+        .stDataFrame td {
+            font-size: 8px;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
         st.dataframe(
             df_display,
             use_container_width=True,
             height=600,
+            hide_index=True,
             column_config={
                 "POSIÇÃO": st.column_config.NumberColumn("Pos.", width="small"),
-                "CARGO": st.column_config.TextColumn("Cargo", width="medium"),
-                "LOCALIDADE": st.column_config.TextColumn("Localidade", width="medium"),
-                "NOME": st.column_config.TextColumn("Nome", width="large"),
-                "INSCRICAO": st.column_config.TextColumn("Inscrição", width="medium"),
+                "CARGO": st.column_config.TextColumn("Cargo", width="small"),
+                "LOCALIDADE": st.column_config.TextColumn("Localidade", width="small"),
+                "NOME": st.column_config.TextColumn("Nome", width="medium"),
+                "INSCRICAO": st.column_config.TextColumn("Inscrição", width="small"),
                 "DATA NASC": st.column_config.TextColumn("Data Nasc.", width="small"),
-                "NOTA": st.column_config.NumberColumn("Nota", width="small"),
-                "CE": st.column_config.NumberColumn("CE", width="small"),
                 "CG": st.column_config.NumberColumn("CG", width="small"),
+                "CE": st.column_config.NumberColumn("CE", width="small"),
                 "ACERTOS": st.column_config.NumberColumn("Acertos", width="small"),
-                "NEGRO": st.column_config.TextColumn("Cota Racial", width="small"),
+                "NOTA": st.column_config.NumberColumn("Nota", width="small"),
+                "NEGRO": st.column_config.TextColumn("Negro", width="small"),
                 "PCD": st.column_config.TextColumn("PCD", width="small")
             }
         )
