@@ -147,7 +147,6 @@ def main():
                 "DATA NASC": st.column_config.TextColumn("Data Nasc.", width="small"),
                 "CG": st.column_config.NumberColumn("CG", width="small"),
                 "CE": st.column_config.NumberColumn("CE", width="small"),
-                "ACERTOS": st.column_config.NumberColumn("Acertos", width="small"),
                 "NOTA": st.column_config.NumberColumn("Nota", width="small"),
                 "NEGRO": st.column_config.TextColumn("Negro", width="small"),
                 "PCD": st.column_config.TextColumn("PCD", width="small")

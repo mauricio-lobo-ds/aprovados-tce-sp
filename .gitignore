@@ -1,4 +1,1 @@
-# Exclude data wrangling folder from version control
-DataWranglingMMLL/
-
 venv/
