@@ -29,6 +29,105 @@ def sort_data(df):
     return df.sort_values(['NOTA', 'CE', 'DATA NASC'], ascending=[False, False, True])
 
 def main():
+    # Aplicar CSS para reduzir tamanhos gerais
+    st.markdown("""
+    <style>
+    /* Reduzir tamanho do título principal */
+    .main h1 {
+        font-size: 1.8rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Reduzir tamanho dos subtítulos */
+    .main h2, .main h3 {
+        font-size: 1.3rem !important;
+        margin-bottom: 0.8rem !important;
+    }
+    
+    /* Reduzir tamanho da fonte dos dropdowns e labels na sidebar */
+    .sidebar .stSelectbox label {
+        font-size: 0.8rem !important;
+    }
+    
+    .sidebar .stSelectbox div[data-baseweb="select"] {
+        font-size: 0.8rem !important;
+    }
+    
+    /* Reduzir tamanho das métricas e adicionar borda com sombra */
+    .stMetric {
+        background-color: white !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        padding: 0.5rem !important;
+        margin: 0.2rem !important;
+        min-height: 60px !important;
+    }
+    
+    .stMetric > div {
+        padding: 0.2rem !important;
+    }
+    
+    .stMetric label {
+        font-size: 0.6rem !important;
+        font-weight: 500 !important;
+        color: #666 !important;
+    }
+    
+    .stMetric div[data-testid="stMetricValue"] > div {
+        font-size: 1.1rem !important;
+        font-weight: bold !important;
+        line-height: 1.2 !important;
+    }
+    
+    /* Alternativa mais específica */
+    [data-testid="stMetric"] {
+        background-color: white !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        padding: 0.4rem !important;
+    }
+    
+    /* Reduzir espaçamento geral */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    /* Reduzir tamanho dos botões */
+    .stButton button {
+        font-size: 0.8rem !important;
+        padding: 0.3rem 0.8rem !important;
+    }
+    
+    /* Reduzir tamanho da fonte da sidebar */
+    .sidebar .stMarkdown {
+        font-size: 0.8rem !important;
+    }
+    
+    /* Reduzir espaçamento na sidebar */
+    .stSidebar .element-container {
+        margin-bottom: 0.1rem !important;
+    }
+    
+    .stSidebar .stSelectbox {
+        margin-bottom: 0rem !important;
+    }
+    
+    .stSidebar .stButton {
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.1rem !important;
+    }
+    
+    /* Reduzir espaçamento dos separadores na sidebar */
+    .stSidebar hr {
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Título principal
     st.title("📊 Dashboard TCE-SP - Candidatos Aprovados")
     st.markdown("---")
@@ -59,6 +158,15 @@ def main():
     pcd_opcoes = ['Todos', 'SIM', 'NAO']
     pcd_selecionado = st.sidebar.selectbox("PCD (Pessoa com Deficiência):", pcd_opcoes)
     
+    # Filtro por STATUS
+    status_opcoes = ['Todos', 'VAGA', 'CR']
+    status_selecionado = st.sidebar.selectbox("Status (VAGA/CR):", status_opcoes)
+    
+    # Link para mostrar imagem de vagas
+    st.sidebar.markdown("---")
+    if st.sidebar.button("📊 Ver Distribuição de Vagas"):
+        st.session_state.show_vagas_image = True
+    
     # Aplicar filtros
     df_filtrado = df.copy()
     
@@ -74,8 +182,10 @@ def main():
     if pcd_selecionado != 'Todos':
         df_filtrado = df_filtrado[df_filtrado['PCD'] == pcd_selecionado]
     
+    if status_selecionado != 'Todos':
+        df_filtrado = df_filtrado[df_filtrado['STATUS'] == status_selecionado]
+    
     # Créditos do desenvolvedor
-    st.sidebar.markdown("---")
     st.sidebar.markdown(
         "<small style='color: #888888;'>Dashboard desenvolvido por Mauricio Lobo</small>", 
         unsafe_allow_html=True
@@ -84,7 +194,41 @@ def main():
     # Aplicar ordenação
     df_filtrado = sort_data(df_filtrado)
     
-    # Informações gerais
+    # Verificar se deve mostrar a imagem de vagas
+    if hasattr(st.session_state, 'show_vagas_image') and st.session_state.show_vagas_image:
+        st.subheader("Distribuição de Vagas")
+        
+        # Botão para voltar à tabela (antes da imagem e com cor azul)
+        st.markdown("""
+        <style>
+        div[data-testid="stButton"] > button[kind="secondary"] {
+            background-color: #0066cc !important;
+            color: white !important;
+            border: none !important;
+        }
+        div[data-testid="stButton"] > button[kind="secondary"]:hover {
+            background-color: #004499 !important;
+            color: white !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        if st.button("← Voltar para Lista de Candidatos", key="voltar_blue"):
+            st.session_state.show_vagas_image = False
+            st.rerun()
+        
+        try:
+            st.image("vagas.png", caption="Distribuição de Vagas TCE-SP", use_column_width=True)
+                
+        except FileNotFoundError:
+            st.error("Imagem vagas.png não encontrada!")
+            st.session_state.show_vagas_image = False
+            st.rerun()
+        
+        return  # Para não mostrar a tabela quando estiver mostrando a imagem
+    
+    
+    # Informações gerais (apenas quando não estiver mostrando a imagem)
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -106,6 +250,9 @@ def main():
     # Tabela principal
     st.subheader("📋 Lista de Candidatos Aprovados")
     
+    # Critério de ordenação (com fonte menor)
+    st.markdown("<small><strong>Critério de Ordenação:</strong> 1º NOTA (maior primeiro), 2º CE (maior primeiro), 3º DATA NASC (mais velhos primeiro)</small>", unsafe_allow_html=True)
+    
     if len(df_filtrado) > 0:
         # Formatar a data para exibição
         df_display = df_filtrado.copy()
@@ -115,7 +262,17 @@ def main():
         df_display.insert(0, 'POSIÇÃO', range(1, len(df_display) + 1))
         
         
-        # Configurar a tabela com fonte menor e colunas mais estreitas
+        # Função para aplicar cor de fundo baseada no STATUS
+        def color_vagas(row):
+            if row['STATUS'] == 'VAGA':
+                return ['background-color: #d4edda'] * len(row)
+            else:
+                return [''] * len(row)
+        
+        # Aplicar styling
+        df_styled = df_display.style.apply(color_vagas, axis=1)
+        
+        # Configurar a tabela com fonte menor
         st.markdown("""
         <style>
         .stDataFrame {
@@ -134,7 +291,7 @@ def main():
         """, unsafe_allow_html=True)
         
         st.dataframe(
-            df_display,
+            df_styled,
             use_container_width=True,
             height=600,
             hide_index=True,
@@ -149,7 +306,8 @@ def main():
                 "CE": st.column_config.NumberColumn("CE", width="small"),
                 "NOTA": st.column_config.NumberColumn("Nota", width="small"),
                 "NEGRO": st.column_config.TextColumn("Negro", width="small"),
-                "PCD": st.column_config.TextColumn("PCD", width="small")
+                "PCD": st.column_config.TextColumn("PCD", width="small"),
+                "STATUS": st.column_config.TextColumn("Status", width="small")
             }
         )
         
@@ -164,10 +322,6 @@ def main():
         
     else:
         st.warning("Nenhum registro encontrado com os filtros aplicados.")
-    
-    # Informações sobre ordenação
-    st.markdown("---")
-    st.info("**Critério de Ordenação:** 1º NOTA (maior primeiro), 2º CE (maior primeiro), 3º DATA NASC (mais velhos primeiro)")
 
 if __name__ == "__main__":
     main()
